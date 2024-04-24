@@ -1,0 +1,77 @@
+const ALLOWED_TYPES = ["string", "number", "bigint", "boolean"];
+
+function validate(contract, object) {
+  for (let key in contract) {
+    if (!object.hasOwnProperty(key)) {
+      throw new Error(`Key ${key} is missing in object.`)
+    }
+
+    if (typeof contract[key] === 'object') {
+      if (Array.isArray(contract[key])) {
+        if (!Array.isArray(object[key])) {
+          throw new Error(`Key ${key} has a non-array value of type ${typeof object[key]} which does not match its definition of type array.`);
+        }
+
+        if (contract[key].length > 1) {
+          throw new Error(`Key ${key} is an array with multiple types which is not supported by the validator.`);
+        }
+
+        if (contract[key].length === 0) {
+          throw new Error(`Key ${key} is an empty array which is not supported by the validator.`);
+        }
+
+        if (object[key].length === 0) {
+          throw new Error(`Key ${key} is an empty array value which does not match its definition of type array.`);
+        }
+
+        if (typeof contract[key][0] === "string") {
+          for (const val of object[key]) {
+            if (typeof val !== contract[key][0]) {
+              throw new Error(`Key ${key} has a value of type ${typeof val}[] which does not match its definition of type ${contract[key][0]}[].`);
+            }
+          }
+        } else {
+          for (let i = 0; i < object[key].length; i++) {
+            validate(contract[key][0], object[key][i]);
+          }
+        }
+      } else {
+        validate(contract[key], object[key]);
+      }
+    } else if (!ALLOWED_TYPES.includes(contract[key])) {
+      throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
+    } else if (typeof object[key] !== contract[key]) {
+      throw new Error(`Key ${key} has a value of type ${typeof object[key]} which does not match its definition of type ${contract[key]}.`);
+    }
+  }
+}
+
+function generateType(name, contract) {
+  const type = {};
+
+  for (let key in contract) {
+    if (typeof contract[key] === 'object') {
+      if (Array.isArray(contract[key])) {
+        if (typeof contract[key][0] === "string") {
+          type[key] = `${contract[key][0]}[]`
+        } else {
+          const interfaceBody = `{${generateType(key.charAt(0).toUpperCase() + key.slice(1), contract[key][0]).split('\n').slice(1, -1).join(' ')}}`;
+          type[key] = `${interfaceBody}[]`
+        }
+      } else {
+        const interfaceBody = `{${generateType(key.charAt(0).toUpperCase() + key.slice(1), contract[key]).split('\n').slice(1, -1).join(' ')}}`;
+        type[key] = interfaceBody;
+      }
+    } else {
+      type[key] = contract[key];
+    }
+  }
+
+  return `interface ${name} {\n${Object.keys(type).map((key) => `  ${key}: ${type[key]};\n`).join('')}\n}`;
+}
+
+function getType(contract) {
+  return typeof contract
+}
+
+module.exports = { validate, generateType, getType }

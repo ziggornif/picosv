@@ -1,0 +1,15 @@
+{
+  "extends": "@tsconfig/node20/tsconfig",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "Node",
+    "outDir": "dist",
+    "baseUrl": "./",
+    "noImplicitAny": false,
+    "lib": [
+      "es6",
+      "dom"
+  ],
+  },
+  "include": ["src/demo.ts"]
+}

@@ -4,12 +4,25 @@
   "description": "A tiny schema validator",
   "main": "index.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "demo": "nodemon src/demo.ts"
   },
   "keywords": [],
   "author": "ziggornif <ziggornif@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "@swc-node/register": "^1.6.6",
+    "@swc/core": "^1.3.68",
+    "@swc/jest": "^0.2.26",
+    "@tsconfig/node20": "^20.1.4",
+    "@vitest/coverage-v8": "^1.5.0",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5",
     "vitest": "^1.5.0"
+  },
+  "dependencies": {
+    "typescript-json-schema": "^0.63.0"
   }
 }
