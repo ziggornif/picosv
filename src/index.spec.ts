@@ -1,5 +1,5 @@
-import { assert, describe, it, expect} from 'vitest';
-import {validate, generateType} from '.'
+import { assert, describe, it, expect } from 'vitest';
+import { validate } from '.'
 describe('Tiny schema validator', () => {
   it('should validate a single level schema', () => {
     const schema = {
@@ -176,7 +176,6 @@ describe('Tiny schema validator', () => {
     })).toThrowError("Key data is an array with multiple types which is not supported by the validator.");
   })
 
-
   it('should validate schema with primitive arrays', () => {
     const schema = {
       event: "string",
@@ -235,7 +234,7 @@ describe('Tiny schema validator', () => {
       data: [{
         foo: "foo1",
         bar: "bar1",
-      },{
+      }, {
         foo: "foo2",
         bar: "bar2",
       }],
@@ -258,7 +257,7 @@ describe('Tiny schema validator', () => {
       data: [{
         foo: "foo1",
         bar: "bar1",
-      },{
+      }, {
         foo: "foo2",
         bar: 42,
       }],
@@ -277,53 +276,5 @@ describe('Tiny schema validator', () => {
       active: true,
       data: "foo",
     })).toThrowError("Key data has a non-array value of type string which does not match its definition of type array.");
-  })
-
-  it.only('should generate TS type from schema', () => {
-    const schema = {
-      event: "string",
-      count: "number",
-      active: "boolean",
-      data: ["string"],
-    };
-
-    console.log(generateType('TestArray', schema))
-  })
-
-  it.only('should generate TS type from schema', () => {
-    const schema = {
-      event: "string",
-      count: "number",
-      active: "boolean",
-      data: [{
-        foo: "string",
-        bar: "string"
-      }],
-    };
-
-    console.log(generateType('TestArray', schema))
-  })
-
-  it.only('should generate TS type from schema', () => {
-    const schema = {
-      event: "string",
-      count: "number",
-      active: "boolean",
-      data: {
-        foo: "string",
-        bar: "string"
-      },
-      events: [{
-        type: "string",
-        content: {
-          description: "string",
-          author: "string",
-          valid: "boolean"
-        }
-      }],
-    };
-
-    console.log("schema:\n", schema);
-    console.log("generated TS type:\n", generateType('ComplexSchema', schema))
   })
 })
