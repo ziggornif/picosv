@@ -1,0 +1,23 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    dependencies:
+      picosv:
+        specifier: ^0.0.1
+        version: 0.0.1
+
+packages:
+
+  picosv@0.0.1:
+    resolution: {integrity: sha512-LqFHmCbjgPkPlYxc7nt7AWnmf3V4wMfZ2bKI0ttLsgdkupCkd+s9XeVoXoYDjrq70v5o+IVwV4joWEnCk3chdw==}
+    engines: {node: '>=20', pnpm: '>=9'}
+
+snapshots:
+
+  picosv@0.0.1: {}

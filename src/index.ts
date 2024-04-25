@@ -1,30 +1,40 @@
-const ALLOWED_TYPES = ["string", "number", "bigint", "boolean"];
+const ALLOWED_TYPES = ['string', 'number', 'bigint', 'boolean'];
 
-type Literal = "number" | "string" | "boolean";
+type Literal = 'number' | 'string' | 'boolean';
 export type SchemaType = {
   [key: string]: Literal | SchemaType | Literal[] | SchemaType[];
-}
+};
 
 interface Maping {
-  number: number,
-  string: string
-  boolean: boolean,
+  number: number;
+  string: string;
+  boolean: boolean;
 }
 
 export type FromSchema<T extends SchemaType> = {
-  [K in keyof T]: T[K] extends Literal ? Maping[T[K]] : T[K] extends SchemaType ? FromSchema<T[K]> : T[K] extends Literal[] ? Maping[T[K][0]][] : T[K] extends SchemaType[] ? FromSchema<T[K][0]>[] : never
+  [K in keyof T]: T[K] extends Literal
+    ? Maping[T[K]]
+    : T[K] extends SchemaType
+      ? FromSchema<T[K]>
+      : T[K] extends Literal[]
+        ? Maping[T[K][0]][]
+        : T[K] extends SchemaType[]
+          ? FromSchema<T[K][0]>[]
+          : never;
 };
 
 function validate(schema: SchemaType, object) {
-  for (let key in schema) {
+  for (const key in schema) {
     if (!object.hasOwnProperty(key)) {
-      throw new Error(`Key ${key} is missing in object.`)
+      throw new Error(`Key ${key} is missing in object.`);
     }
 
     if (typeof schema[key] === 'object') {
       if (Array.isArray(schema[key])) {
         if (!Array.isArray(object[key])) {
-          throw new Error(`Key ${key} has a non-array value of type ${typeof object[key]} which does not match its definition of type array.`);
+          throw new Error(
+            `Key ${key} has a non-array value of type ${typeof object[key]} which does not match its definition of type array.`
+          );
         }
 
         if ((schema[key] as Literal[] | SchemaType[]).length > 1) {
@@ -39,10 +49,12 @@ function validate(schema: SchemaType, object) {
           throw new Error(`Key ${key} is an empty array value which does not match its definition of type array.`);
         }
 
-        if (typeof schema[key][0] === "string") {
+        if (typeof schema[key][0] === 'string') {
           for (const val of object[key]) {
             if (typeof val !== schema[key][0]) {
-              throw new Error(`Key ${key} has a value of type ${typeof val}[] which does not match its definition of type ${schema[key][0]}[].`);
+              throw new Error(
+                `Key ${key} has a value of type ${typeof val}[] which does not match its definition of type ${schema[key][0]}[].`
+              );
             }
           }
         } else {
@@ -53,13 +65,14 @@ function validate(schema: SchemaType, object) {
       } else {
         validate(schema[key] as SchemaType, object[key]);
       }
-      //@ts-ignore
     } else if (!ALLOWED_TYPES.includes(schema[key] as string)) {
       throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
     } else if (typeof object[key] !== schema[key]) {
-      throw new Error(`Key ${key} has a value of type ${typeof object[key]} which does not match its definition of type ${schema[key]}.`);
+      throw new Error(
+        `Key ${key} has a value of type ${typeof object[key]} which does not match its definition of type ${schema[key]}.`
+      );
     }
   }
 }
 
-export { validate }
+export { validate };

@@ -1,17 +1,22 @@
 {
-  "name": "tsv",
+  "name": "picosv",
   "version": "0.0.1",
-  "description": "A tiny schema validator",
+  "packageManager": "pnpm@9.0.6",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "description": "A pico schema validator",
   "files": [
     "dist"
   ],
   "types": "dist/index.d.ts",
-  "main": "dist/tsv.umd.js",
-  "module": "dist/tsv.mjs",
+  "main": "dist/picosv.umd.js",
+  "module": "dist/picosv.mjs",
   "exports": {
     ".": {
-      "import": "./dist/tsv.mjs",
-      "require": "./dist/tsv.umd.js"
+      "import": "./dist/picosv.mjs",
+      "require": "./dist/picosv.umd.js"
     }
   },
   "scripts": {
@@ -28,16 +33,28 @@
     "validation"
   ],
   "author": "ziggornif <ziggornif@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ziggornif/picosv.git"
+  },
+  "bugs": "https://github.com/ziggornif/picosv/issues",
   "license": "MIT",
   "devDependencies": {
     "@tsconfig/node20": "20.1.4",
-    "@vitest/coverage-v8": "^1.5.2",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.10",
-    "vite-plugin-dts": "^3.9.0",
-    "vitest": "^1.5.2"
-  },
-  "dependencies": {
-    "typescript-json-schema": "^0.63.0"
+    "@typescript-eslint/eslint-plugin": "7.7.1",
+    "@typescript-eslint/parser": "7.7.1",
+    "@vitest/coverage-v8": "1.5.2",
+    "eslint": "8.57.0",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-airbnb-typescript": "18.0.0",
+    "eslint-config-prettier": "9.1.0",
+    "eslint-import-resolver-typescript": "3.6.1",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-no-only-tests": "3.1.0",
+    "eslint-plugin-prettier": "5.1.3",
+    "typescript": "5.4.5",
+    "vite": "5.2.10",
+    "vite-plugin-dts": "3.9.0",
+    "vitest": "1.5.2"
   }
 }

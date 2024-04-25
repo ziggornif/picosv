@@ -8,9 +8,9 @@ export default defineConfig({
     lib: {
       // Could also be a dictionary or array of multiple entry points
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'tjs',
+      name: 'picosv',
       // the proper extensions will be added
-      fileName: 'tjs',
+      fileName: 'picosv',
     },
   },
   plugins: [dts({

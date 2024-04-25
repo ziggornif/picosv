@@ -1,7 +1,13 @@
-src/examples
+src
 .vscode
 coverage
 node_modules
 .gitignore
+.eslintrc.cjs
+.prettierrc.cjs
 tsconfig.json
-vitest.config.ts
+tsconfig.eslint.json
+vite.config.mjs
+.nvmrc
+.DS_Store
+.github
