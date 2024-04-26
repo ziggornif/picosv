@@ -1,6 +1,6 @@
-const ALLOWED_TYPES = ['string', 'number', 'bigint', 'boolean'];
+const ALLOWED_TYPES = ['string', 'number', 'bigint', 'boolean', 'object'];
 
-type Literal = 'number' | 'string' | 'boolean';
+type Literal = 'number' | 'string' | 'boolean' | 'object';
 export type SchemaType = {
   [key: string]: Literal | SchemaType | Literal[] | SchemaType[];
 };
@@ -9,6 +9,7 @@ interface Maping {
   number: number;
   string: string;
   boolean: boolean;
+  object: object;
 }
 
 export type FromSchema<T extends SchemaType> = {

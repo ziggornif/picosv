@@ -62,6 +62,39 @@ const schema = {
 }
 ```
 
+### Objects
+
+Object properties can be defined in two ways:
+- generically using the type `object'
+- in detail by describing the properties of the object
+
+In the first case, the properties of the object will not be checked.
+
+**Generic example :**
+
+```ts
+const schema = {
+  event: 'string',
+  count: 'number',
+  active: 'boolean',
+  data: 'object'
+}
+```
+
+**Detailed example :**
+
+```ts
+const schema = {
+  event: 'string',
+  count: 'number',
+  active: 'boolean',
+  data: {
+    foo: 'string',
+    bar: 'number'
+  }
+}
+```
+
 ### Entities Validation
 
 To validate an object against a schema, simply call the validate function and pass in the schema and the object to validate. The function will throw an error if the object does not match the schema.

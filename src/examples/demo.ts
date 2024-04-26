@@ -5,6 +5,7 @@ const schema = {
   event: 'string',
   count: 'number',
   active: 'boolean',
+  unknown: 'object',
   data: {
     foo: 'string',
     bar: 'number',
@@ -31,6 +32,9 @@ const a: MyType = {
   count: 55,
   active: false,
   event: 'coucou',
+  unknown: {
+    foo: 'bar',
+  },
   data: {
     bar: 55,
     foo: 'test',
@@ -45,7 +49,7 @@ const a: MyType = {
       content: {
         author: 'blu',
         description: 'qwe',
-        valid: 42,
+        valid: true,
       },
     },
   ],

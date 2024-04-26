@@ -43,6 +43,7 @@ describe('Tiny schema validator', () => {
         foo: 'string',
         bar: 'string',
       },
+      unknown: 'object',
     };
 
     assert.doesNotThrow(
@@ -55,6 +56,7 @@ describe('Tiny schema validator', () => {
             foo: 'foo',
             bar: 'bar',
           },
+          unknown: { baz: 'baz' },
         }),
       Error
     );
@@ -161,7 +163,7 @@ describe('Tiny schema validator', () => {
         count: 42,
         active: true,
       })
-    ).toThrowError('Key active is a non valid type, supported types are string, number, bigint, boolean.');
+    ).toThrowError('Key active is a non valid type, supported types are string, number, bigint, boolean, object.');
   });
 
   it('should refuse empty schema arrays', () => {
