@@ -1,5 +1,5 @@
 import { assert, describe, it, expect } from 'vitest';
-import { validate } from '.';
+import { picosv } from '.';
 describe('Tiny schema validator', () => {
   it('should validate a single level schema', () => {
     const schema = {
@@ -8,9 +8,11 @@ describe('Tiny schema validator', () => {
       active: 'boolean',
     };
 
+    const picoSchema = picosv(schema);
+
     assert.doesNotThrow(
       () =>
-        validate(schema, {
+        picoSchema.validate({
           event: 'entity-created',
           count: 42,
           active: true,
@@ -19,7 +21,7 @@ describe('Tiny schema validator', () => {
     );
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: '42',
         active: true,
@@ -27,7 +29,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key count has a value of type string which does not match its definition of type number.');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
       })
@@ -46,9 +48,11 @@ describe('Tiny schema validator', () => {
       unknown: 'object',
     };
 
+    const picoSchema = picosv(schema);
+
     assert.doesNotThrow(
       () =>
-        validate(schema, {
+        picoSchema.validate({
           event: 'entity-created',
           count: 42,
           active: true,
@@ -62,7 +66,7 @@ describe('Tiny schema validator', () => {
     );
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -74,7 +78,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key foo has a value of type number which does not match its definition of type string.');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -100,9 +104,11 @@ describe('Tiny schema validator', () => {
       },
     };
 
+    const picoSchema = picosv(schema);
+
     assert.doesNotThrow(
       () =>
-        validate(schema, {
+        picoSchema.validate({
           event: 'entity-created',
           count: 42,
           active: true,
@@ -119,7 +125,7 @@ describe('Tiny schema validator', () => {
     );
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -135,7 +141,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key a has a value of type string which does not match its definition of type number.');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -157,13 +163,9 @@ describe('Tiny schema validator', () => {
       active: 'foo',
     };
 
-    expect(() =>
-      validate(schema, {
-        event: 'entity-created',
-        count: 42,
-        active: true,
-      })
-    ).toThrowError('Key active is a non valid type, supported types are string, number, bigint, boolean, object.');
+    expect(() => picosv(schema)).toThrowError(
+      'Key active is a non valid type, supported types are string, number, bigint, boolean, object.'
+    );
   });
 
   it('should refuse empty schema arrays', () => {
@@ -174,19 +176,7 @@ describe('Tiny schema validator', () => {
       data: [],
     };
 
-    expect(() =>
-      validate(schema, {
-        event: 'entity-created',
-        count: 42,
-        active: true,
-        data: [
-          {
-            foo: 42,
-            bar: 'bar',
-          },
-        ],
-      })
-    ).toThrowError('Key data is an empty array which is not supported by the validator.');
+    expect(() => picosv(schema)).toThrowError('Key data is an empty array which is not supported by the validator.');
   });
 
   it('should refuse schema arrays with multiple types', () => {
@@ -197,19 +187,9 @@ describe('Tiny schema validator', () => {
       data: ['string', 'boolean'],
     };
 
-    expect(() =>
-      validate(schema, {
-        event: 'entity-created',
-        count: 42,
-        active: true,
-        data: [
-          {
-            foo: 42,
-            bar: 'bar',
-          },
-        ],
-      })
-    ).toThrowError('Key data is an array with multiple types which is not supported by the validator.');
+    expect(() => picosv(schema)).toThrowError(
+      'Key data is an array with multiple types which is not supported by the validator.'
+    );
   });
 
   it('should validate schema with primitive arrays', () => {
@@ -220,9 +200,11 @@ describe('Tiny schema validator', () => {
       data: ['string'],
     };
 
+    const picoSchema = picosv(schema);
+
     assert.doesNotThrow(
       () =>
-        validate(schema, {
+        picoSchema.validate({
           event: 'entity-created',
           count: 42,
           active: true,
@@ -232,7 +214,7 @@ describe('Tiny schema validator', () => {
     );
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -246,7 +228,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key data has a value of type object[] which does not match its definition of type string[].');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -255,7 +237,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key data is an empty array value which does not match its definition of type array.');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -277,9 +259,11 @@ describe('Tiny schema validator', () => {
       ],
     };
 
+    const picoSchema = picosv(schema);
+
     assert.doesNotThrow(
       () =>
-        validate(schema, {
+        picoSchema.validate({
           event: 'entity-created',
           count: 42,
           active: true,
@@ -298,7 +282,7 @@ describe('Tiny schema validator', () => {
     );
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -312,7 +296,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key foo has a value of type number which does not match its definition of type string.');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -330,7 +314,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key bar has a value of type number which does not match its definition of type string.');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,
@@ -339,7 +323,7 @@ describe('Tiny schema validator', () => {
     ).toThrowError('Key data is an empty array value which does not match its definition of type array.');
 
     expect(() =>
-      validate(schema, {
+      picoSchema.validate({
         event: 'entity-created',
         count: 42,
         active: true,

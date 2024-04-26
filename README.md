@@ -21,15 +21,21 @@ A schema in Picosv is an object that defines the structure of your data. The fol
 Here's a simple example:
 
 ```ts
+import { picosv } from 'picosv';
+
 const schema = {
   name: 'string',
   age: 'number'
 };
+
+const picoSchema = picosv(schema);
 ```
 
 And here's a more complex example with arrays and objects:
 
 ```ts
+import { picosv } from 'picosv';
+
 const schema = {
   events: [
     { type: 'string', content: { message: 'string', source: 'string' } }
@@ -41,6 +47,8 @@ const schema = {
   count: 'number',
   active: 'boolean'
 };
+
+const picoSchema = picosv(schema);
 ```
 
 ### Schema typing rules
@@ -97,12 +105,14 @@ const schema = {
 
 ### Entities Validation
 
-To validate an object against a schema, simply call the validate function and pass in the schema and the object to validate. The function will throw an error if the object does not match the schema.
+To validate an object against a schema, simply call the validate function in your picosv schema instance and pass the object to validate. The function will throw an error if the object does not match the schema.
 
 Here's an example:
 
 ```ts
-import { validate } from 'picosv';
+import { picosv } from 'picosv';
+
+const picoSchema = picosv(schema);
 
 const object = {
   events: [
@@ -117,7 +127,7 @@ const object = {
 };
 
 try {
-  validate(schema, object);
+  picoSchema.validate(object);
 } catch (error) {
   console.error(error);
 }
@@ -192,8 +202,8 @@ const a: YourAwesomeType = {
 
 | Library                                        | Size (Minified) | Size (Minified + Gzipped) | Bench (simple schema) | Bench (complex schema) |
 | ---------------------------------------------- | --------------- | ------------------------- | --------------------- | ---------------------- |
-| [Ajv](https://www.npmjs.com/package/ajv)       | 119.6 kb        | 35.2 kb                   | 112,429,047 ops/sec   | 43,209,702 ops/sec     |
-| [Picosv](https://www.npmjs.com/package/picosv) | 1.4 kb          | 0.55 kb                   | 25,384,389 ops/sec    | 3,502,764 ops/sec      |
+| [Ajv](https://www.npmjs.com/package/ajv)       | 119.6 kb        | 35.2 kb                   | 157,815,912 ops/sec   | 51,951,659 ops/sec     |
+| [Picosv](https://www.npmjs.com/package/picosv) | 1.4 kb          | 0.55 kb                   | 30,798,558 ops/sec    | 4,052,120 ops/sec      |
 | [Zod](https://www.npmjs.com/package/zod)       | 60.9 kb         | 14.2 kb                   | 5,089,661 ops/sec     | 709,588 ops/sec        |
 
 Benchmark files are available in the `src/benchmark` directory

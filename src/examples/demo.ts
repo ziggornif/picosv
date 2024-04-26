@@ -1,5 +1,5 @@
 import type { FromSchema, SchemaType } from '..';
-import { validate } from '..';
+import { picosv } from '..';
 
 const schema = {
   event: 'string',
@@ -25,6 +25,8 @@ const schema = {
     },
   ],
 } as const satisfies SchemaType;
+
+const picoSchema = picosv(schema);
 
 type MyType = FromSchema<typeof schema>;
 
@@ -55,4 +57,4 @@ const a: MyType = {
   ],
 };
 
-validate(schema, a);
+picoSchema.validate(a);

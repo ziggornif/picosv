@@ -24,7 +24,35 @@ export type FromSchema<T extends SchemaType> = {
           : never;
 };
 
-function validate(schema: SchemaType, object) {
+function _parse(schema: SchemaType) {
+  for (const key in schema) {
+    if (typeof schema[key] === 'object') {
+      if (Array.isArray(schema[key])) {
+        if ((schema[key] as Literal[] | SchemaType[]).length > 1) {
+          throw new Error(`Key ${key} is an array with multiple types which is not supported by the validator.`);
+        }
+
+        if (schema[key].length === 0) {
+          throw new Error(`Key ${key} is an empty array which is not supported by the validator.`);
+        }
+
+        if (typeof schema[key][0] === 'string' && !ALLOWED_TYPES.includes(schema[key][0] as string)) {
+          throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
+        }
+      } else {
+        _parse(schema[key][0] as SchemaType);
+      }
+    } else {
+      if (!ALLOWED_TYPES.includes(schema[key] as string)) {
+        throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
+      }
+    }
+  }
+
+  return schema;
+}
+
+function _validate(schema: SchemaType, object) {
   for (const key in schema) {
     if (!object.hasOwnProperty(key)) {
       throw new Error(`Key ${key} is missing in object.`);
@@ -36,14 +64,6 @@ function validate(schema: SchemaType, object) {
           throw new Error(
             `Key ${key} has a non-array value of type ${typeof object[key]} which does not match its definition of type array.`
           );
-        }
-
-        if ((schema[key] as Literal[] | SchemaType[]).length > 1) {
-          throw new Error(`Key ${key} is an array with multiple types which is not supported by the validator.`);
-        }
-
-        if (schema[key].length === 0) {
-          throw new Error(`Key ${key} is an empty array which is not supported by the validator.`);
         }
 
         if (object[key].length === 0) {
@@ -60,14 +80,12 @@ function validate(schema: SchemaType, object) {
           }
         } else {
           for (let i = 0; i < object[key].length; i++) {
-            validate(schema[key][0], object[key][i]);
+            _validate(schema[key][0], object[key][i]);
           }
         }
       } else {
-        validate(schema[key] as SchemaType, object[key]);
+        _validate(schema[key] as SchemaType, object[key]);
       }
-    } else if (!ALLOWED_TYPES.includes(schema[key] as string)) {
-      throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
     } else if (typeof object[key] !== schema[key]) {
       throw new Error(
         `Key ${key} has a value of type ${typeof object[key]} which does not match its definition of type ${schema[key]}.`
@@ -76,4 +94,14 @@ function validate(schema: SchemaType, object) {
   }
 }
 
-export { validate };
+function picosv(inputSchema: SchemaType) {
+  const schema = _parse(inputSchema);
+  function validate(object) {
+    return _validate(schema, object);
+  }
+  return {
+    validate,
+  };
+}
+
+export { picosv };

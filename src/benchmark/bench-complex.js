@@ -1,70 +1,69 @@
 const Benchmark = require('benchmark');
-const picosv = require('picosv');
+const {picosv} = require('picosv');
 const Ajv = require('ajv');
-const { z } = require('zod');
-const suite = new Benchmark.Suite();
+const {z} = require('zod');
+const suite = new Benchmark.Suite;
 
-const ajv = new Ajv();
+const ajv = new Ajv()
 
 const ajvSchema = {
-  type: 'object',
+  type: "object",
   properties: {
-    event: { type: 'string' },
-    count: { type: 'number' },
-    active: { type: 'boolean' },
+    event: {type: "string"},
+    count: {type: "number"},
+    active: {type: "boolean"},
     data: {
-      type: 'object',
+      type: "object",
       properties: {
-        foo: { type: 'string' },
-        bar: { type: 'number' },
-      },
+        foo: {type: "string"},
+        bar: {type: "number"},
+      }
     },
     arr: {
-      type: 'array',
+      type: "array", 
       items: {
-        type: 'string',
-      },
+        type: "string"  
+      }
     },
     events: {
-      type: 'array',
+      type: "array",
       items: {
-        type: 'object',
+        type: "object",
         properties: {
-          type: { type: 'string' },
+          type: {type: "string"},
           content: {
-            type: 'object',
+            type: "object",
             properties: {
-              description: { type: 'string' },
-              author: { type: 'string' },
-              valid: { type: 'boolean' },
-            },
-          },
-        },
-      },
-    },
-  },
-};
+              description: {type: "string"},
+              author: {type: "string"},
+              valid: {type: "boolean"},
+            }
+          }
+        }
+      }
+    }
+  }
+}
+const ajvValidate = ajv.compile(ajvSchema)
 
-const picosvSchema = {
-  event: 'string',
-  count: 'number',
-  active: 'boolean',
+const picosvSchema = picosv({
+  event: "string",
+  count: "number",
+  active: "boolean",
   data: {
-    foo: 'string',
-    bar: 'number',
+    foo: "string",
+    bar: "number",
   },
-  arr: ['string'],
-  events: [
-    {
-      type: 'string',
-      content: {
-        description: 'string',
-        author: 'string',
-        valid: 'boolean',
-      },
-    },
-  ],
-};
+  arr: ["string"],
+  events: [{
+    type: "string",
+    content: {
+      description: "string",
+      author: "string",
+      valid: "boolean"
+    }
+  }],
+})
 
 const zodSchema = z.object({
   event: z.string(),
@@ -75,16 +74,14 @@ const zodSchema = z.object({
     bar: z.number(),
   }),
   arr: z.array(z.string()),
-  events: z.array(
-    z.object({
-      type: z.string(),
-      content: z.object({
-        description: z.string(),
-        author: z.string(),
-        valid: z.boolean(),
-      }),
+  events: z.array(z.object({
+    type: z.string(),
+    content: z.object({
+      description: z.string(),
+      author: z.string(),
+      valid: z.boolean(),
     })
-  ),
+  }))
 });
 
 const entity = {
@@ -93,47 +90,43 @@ const entity = {
   event: 'coucou',
   data: {
     bar: 55,
-    foo: 'test',
+    foo: "test"
   },
-  arr: ['foo', 'bar'],
-  events: [
-    {
-      type: 'foo',
-      content: {
-        author: 'blu',
-        description: 'qwe',
-        valid: true,
-      },
-    },
-  ],
-};
+  arr: ["foo", "bar"],
+  events: [{
+    type: "foo",
+    content: {
+      author: "blu",
+      description: "qwe",
+      valid: true
+    }
+  }]
+}
 
 // add tests
-suite
-  .add('ajv#validate', function () {
-    const ajvValidate = ajv.compile(ajvSchema);
-    const valid = ajvValidate(entity);
-    if (!valid) console.log(ajvValidate.errors);
-  })
-  .add('picosv#validate', function () {
-    try {
-      picosv.validate(picosvSchema, entity);
-    } catch (error) {
-      console.error(error);
-    }
-  })
-  .add('zod#parse', function () {
-    try {
-      zodSchema.parse(entity);
-    } catch (error) {
-      console.error(error);
-    }
-  })
-  .on('cycle', function (event) {
-    console.log(String(event.target));
-  })
-  .on('complete', function () {
-    console.log('Fastest is ' + this.filter('fastest').map('name'));
-  })
-  // run async
-  .run({ async: true });
+suite.add('ajv#validate', function() {
+  const valid = ajvValidate(entity)
+  if (!valid) console.log(ajvValidate.errors)
+})
+.add('picosv#validate', function() {
+  try {
+    picosvSchema.validate(entity);
+  } catch (error) {
+    console.error(error);
+  }
+})
+.add('zod#parse', function() {
+  try {
+    zodSchema.parse(entity);
+  } catch (error) {
+    console.error(error);
+  }
+})
+.on('cycle', function(event) {
+  console.log(String(event.target));
+})
+.on('complete', function() {
+  console.log('Fastest is ' + this.filter('fastest').map('name'));
+})
+// run async
+.run({ 'async': true });
