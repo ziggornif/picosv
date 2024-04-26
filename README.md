@@ -1,8 +1,8 @@
 # picosv (Pico Schema Validator)
 
-picosv is pico schema validator (1.58 KB) based on JavaScript data types and written in vanilla with no dependencies.
+picosv is pico schema validator (1.58 KB) based on JavaScript data types and written in vanilla JavaScript with no dependencies.
 
-Usable on both the frontend and backend sides, this lightweight validator is able to validate JavaScript entities from schemas.
+Usable on both the frontend and backend, this lightweight validator is able to validate JavaScript entities from schemas.
 
 ## Install
 
@@ -125,7 +125,7 @@ try {
 
 ## Typescript type inference
 
-The library also provide Typescript type inference from your schemas.
+The library also provides Typescript type inference from your schemas.
 
 Let's see how it's works :
 
@@ -154,7 +154,7 @@ const schema = {
 } as const satisfies SchemaType;
 ```
 
-Notice that the `as const statifies SchemaType` which will validate that our schema respects the type SchemaType.
+Notice that the `as const statifies SchemaType` will validate that our schema respects the type `SchemaType`.
 
 Then create your type :
 
@@ -187,6 +187,16 @@ const a: YourAwesomeType = {
   }]
 }
 ```
+
+## Benchmark
+
+| Library                                        | Size (Minified) | Size (Minified + Gzipped) | Bench (simple schema) | Bench (complex schema) |
+| ---------------------------------------------- | --------------- | ------------------------- | --------------------- | ---------------------- |
+| [Ajv](https://www.npmjs.com/package/ajv)       | 119.6 kb        | 35.2 kb                   | 112,429,047 ops/sec   | 43,209,702 ops/sec     |
+| [Picosv](https://www.npmjs.com/package/picosv) | 1.4 kb          | 0.55 kb                   | 25,384,389 ops/sec    | 3,502,764 ops/sec      |
+| [Zod](https://www.npmjs.com/package/zod)       | 60.9 kb         | 14.2 kb                   | 5,089,661 ops/sec     | 709,588 ops/sec        |
+
+Benchmark files are available in the `src/benchmark` directory
 
 ## Contributors
 
