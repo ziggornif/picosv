@@ -1,6 +1,6 @@
 # picosv (Pico Schema Validator)
 
-picosv is pico schema validator (1.75 KB) based on JavaScript data types and written in vanilla JavaScript with no dependencies.
+picosv is pico schema validator (2.50 KB) based on JavaScript data types and written in vanilla JavaScript with no dependencies.
 
 Usable on both the frontend and backend, this lightweight validator is able to validate JavaScript entities from schemas.
 
@@ -311,7 +311,7 @@ const a: YourAwesomeType = {
 | Library                                        | Size (Minified) | Size (Minified + Gzipped) | Bench (simple schema) | Bench (complex schema) |
 | ---------------------------------------------- | --------------- | ------------------------- | --------------------- | ---------------------- |
 | [Ajv](https://www.npmjs.com/package/ajv)       | 119.6 kb        | 35.2 kb                   | 157,815,912 ops/sec   | 51,951,659 ops/sec     |
-| [Picosv](https://www.npmjs.com/package/picosv) | 1.75 kb         | 0.75 kb                   | 53,005,826 ops/sec    | 5,918,499 ops/sec       |
+| [Picosv](https://www.npmjs.com/package/picosv) | 2.53 kb         | 0.94 kb                   | 53,005,826 ops/sec    | 5,918,499 ops/sec      |
 | [Zod](https://www.npmjs.com/package/zod)       | 60.9 kb         | 14.2 kb                   | 5,089,661 ops/sec     | 709,588 ops/sec        |
 
 Benchmark files are available in the `src/benchmark` directory

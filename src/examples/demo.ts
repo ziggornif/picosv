@@ -1,34 +1,35 @@
 import type { FromSchema, SchemaType } from '..';
-import { picosv } from '..';
+import { array, boolean, number, object, optional, picosv, string } from '..';
 
 const schema = {
-  event: 'string',
-  count: 'number',
-  active: 'boolean',
-  unknown: 'object',
-  data: {
-    foo: 'string',
-    bar: 'number',
-    infinite: {
-      infinity: 'number',
-    },
-  },
-  arr: ['string'],
-  events: [
-    {
-      type: 'string',
-      content: {
-        description: 'string',
-        author: 'string',
-        valid: 'boolean',
-      },
-    },
-  ],
+  event: string(),
+  count: number(),
+  active: optional(boolean()),
+  unknown: optional(object()),
+  data: object({
+    foo: string(),
+    bar: optional(number()),
+    infinite: object({
+      infinity: number(),
+    }),
+  }),
+  arr: array(string()),
+  events: optional(
+    array(
+      object({
+        type: string(),
+        content: object({
+          description: string(),
+          author: string(),
+          valid: optional(boolean()),
+        }),
+      })
+    )
+  ),
 } as const satisfies SchemaType;
+type MyType = FromSchema<typeof schema>;
 
 const picoSchema = picosv(schema);
-
-type MyType = FromSchema<typeof schema>;
 
 const a: MyType = {
   count: 55,
@@ -48,13 +49,10 @@ const a: MyType = {
   events: [
     {
       type: 'foo',
-      content: {
-        author: 'blu',
-        description: 'qwe',
-        valid: true,
-      },
+      content: 'qwe',
     },
   ],
 };
 
-picoSchema.validate(a);
+const validation = picoSchema.validate(a);
+console.log('validation', validation);

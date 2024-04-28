@@ -1,66 +1,115 @@
 const ALLOWED_TYPES = ['string', 'number', 'bigint', 'boolean', 'object'];
 
-type Literal = 'number' | 'string' | 'boolean' | 'object';
-export type SchemaType = {
-  [key: string]: Literal | SchemaType | Literal[] | SchemaType[];
+type EntityType = StringType | NumberType | BigintType | BooleanType | GenericObjectType;
+
+type StringType = {
+  type: 'string';
 };
 
-interface Maping {
+type NumberType = {
+  type: 'number';
+};
+
+type BigintType = {
+  type: 'bigint';
+};
+
+type BooleanType = {
+  type: 'boolean';
+};
+
+type GenericObjectType = {
+  type: 'object';
+};
+
+type ObjectType = {
+  type: 'object';
+  properties: SchemaType;
+};
+
+type LiteralArrayType = {
+  type: 'array';
+  items: EntityType;
+};
+
+type ObjectArrayType = {
+  type: 'array';
+  items: ObjectType;
+};
+
+type GenericObjectArrayType = {
+  type: 'array';
+  items: GenericObjectType;
+};
+
+type Optional<T> = T & { optional: boolean };
+
+export type SchemaType = {
+  [key: string]:
+    | EntityType
+    | ObjectType
+    | GenericObjectType
+    | LiteralArrayType
+    | ObjectArrayType
+    | GenericObjectArrayType;
+};
+
+interface Mapping {
   number: number;
   string: string;
+  bigint: bigint;
   boolean: boolean;
   object: object;
 }
 
 export type FromSchema<T extends SchemaType> = {
-  [K in keyof T]: T[K] extends Literal
-    ? Maping[T[K]]
-    : T[K] extends SchemaType
-      ? FromSchema<T[K]>
-      : T[K] extends Literal[]
-        ? Maping[T[K][0]][]
-        : T[K] extends SchemaType[]
-          ? FromSchema<T[K][0]>[]
+  [K in keyof T]: T[K] extends EntityType
+    ? Mapping[T[K]['type']]
+    : // : T[K] extends GenericObjectType
+      // ? Mapping[T[K]['type']]
+      T[K] extends ObjectType
+      ? FromSchema<T[K]['properties']>
+      : T[K] extends LiteralArrayType | GenericObjectArrayType
+        ? Mapping[T[K]['items']['type']][]
+        : T[K] extends ObjectArrayType
+          ? FromSchema<T[K]['items']['properties']>[]
           : never;
 };
 
-function string() {
+function string(): StringType {
   return {
     type: 'string',
   };
 }
 
-function boolean() {
+function boolean(): BooleanType {
   return {
     type: 'boolean',
   };
 }
 
-function number() {
+function number(): NumberType {
   return {
     type: 'number',
   };
 }
 
-function bigint() {
+function bigint(): BigintType {
   return {
     type: 'bigint',
   };
 }
 
-function object(properties?: object) {
-  return {
-    type: 'object',
-    properties,
-  };
+function object(properties?: SchemaType): GenericObjectType | ObjectType {
+  if (properties) return { type: 'object', properties } as ObjectType;
+  return { type: 'object' } as GenericObjectType;
 }
 
-function array(type) {
+function array(
+  type: EntityType | ObjectType | GenericObjectType
+): LiteralArrayType | ObjectArrayType | GenericObjectArrayType {
   if (!type) {
-    throw new Error(`ArrayTypeError - array type must be defined`);
-  }
-  if (Array.isArray(type) || !ALLOWED_TYPES.includes(type.type as string)) {
-    throw new Error(`ArrayTypeError - ${type} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
+    throw new Error(`ArrayTypeError - array type must be defined.`);
   }
 
   return {
@@ -69,78 +118,46 @@ function array(type) {
   };
 }
 
-function optional(type) {
+function optional(
+  type: EntityType | ObjectType | GenericObjectType | LiteralArrayType | ObjectArrayType | GenericObjectArrayType
+): Optional<EntityType | ObjectType | GenericObjectType | LiteralArrayType | ObjectArrayType | GenericObjectArrayType> {
   if (!type) {
-    throw new Error(`OptionalTypeError - optional need a type`);
+    throw new Error(`OptionalTypeError - optional need a type.`);
   }
+
   return {
     ...type,
     optional: true,
   };
 }
 
-// function _parse(schema: SchemaType) {
-//   for (const key in schema) {
-//     if (typeof schema[key] === 'object') {
-//       if (Array.isArray(schema[key])) {
-//         if ((schema[key] as Literal[] | SchemaType[]).length > 1) {
-//           throw new Error(`Key ${key} is an array with multiple types which is not supported by the validator.`);
-//         }
+function _parse(schema: SchemaType) {
+  for (const key in schema) {
+    const schemaKey = schema[key];
+    if (!schemaKey.type) {
+      throw new Error(`Key ${key} must have a type.`);
+    } else if (
+      schemaKey.type === 'array' &&
+      (!(schemaKey as ObjectArrayType).items || !(schemaKey as ObjectArrayType).items?.type)
+    ) {
+      throw new Error(`Key ${key} is an empty array which is not supported by the validator.`);
+    } else if (
+      schemaKey.type === 'array' &&
+      (schemaKey as ObjectArrayType).items.type === 'object' &&
+      (schemaKey as ObjectArrayType).items?.properties
+    ) {
+      _parse((schemaKey as ObjectArrayType).items?.properties);
+    } else if (schemaKey.type === 'array' && !ALLOWED_TYPES.includes((schemaKey as LiteralArrayType).items.type)) {
+      throw new Error(`Key ${key} is an array of non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
+    } else if (schemaKey.type === 'object' && (schemaKey as ObjectType).properties) {
+      _parse((schemaKey as ObjectType).properties);
+    } else if (schemaKey.type !== 'array' && schemaKey.type !== 'object' && !ALLOWED_TYPES.includes(schemaKey.type)) {
+      throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
+    }
+  }
 
-//         if (schema[key].length === 0) {
-//           throw new Error(`Key ${key} is an empty array which is not supported by the validator.`);
-//         }
-
-//         if (typeof schema[key][0] === 'string' && !ALLOWED_TYPES.includes(schema[key][0] as string)) {
-//           throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
-//         }
-//       } else {
-//         _parse(schema[key][0] as SchemaType);
-//       }
-//     } else {
-//       if (!ALLOWED_TYPES.includes(schema[key] as string)) {
-//         throw new Error(`Key ${key} is a non valid type, supported types are ${ALLOWED_TYPES.join(', ')}.`);
-//       }
-//     }
-//   }
-
-//   return schema;
-// }
-
-// function _validate(schema, object) {
-//   for (const key in schema) {
-//     if (object[key] === undefined && !schema[key]?.optional) {
-//       throw new Error(`Key ${key} is missing in object.`);
-//     }
-
-//     if (!object[key] && schema[key]?.optional) {
-//       continue;
-//     }
-
-//     if (schema[key].type === 'object' && schema[key].properties) {
-//       _validate(schema[key].properties, object[key]);
-//     } else if (schema[key].type === 'array') {
-//       if (schema[key].items?.properties) {
-//         for (let i = 0; i < object[key].length; i++) {
-//           _validate(schema[key].items.properties, object[key][i]);
-//         }
-//       } else {
-//         for (let i = 0; i < object[key].length; i++) {
-//           const valType = typeof object[key][i];
-//           if (valType !== schema[key].items.type) {
-//             throw new Error(
-//               `Key ${key} has a value of type ${object[key][i]}[] which does not match its definition of type ${schema[key].items}[].`
-//             );
-//           }
-//         }
-//       }
-//     } else if (typeof object[key] !== schema[key].type) {
-//       throw new Error(
-//         `Key ${key} has a value of type ${typeof object[key]} which does not match its definition of type ${schema.type}.`
-//       );
-//     }
-//   }
-// }
+  return schema;
+}
 
 function _validate(schema, object) {
   for (const key in schema) {
@@ -166,10 +183,16 @@ function _validate(schema, object) {
       _validate(schemaKey.properties, objectKey);
     } else if (schemaKey.type === 'array') {
       const items = schemaKey.items;
+      if (!Array.isArray(objectKey)) {
+        throw new Error(
+          `Key ${key} has a non-array value of type string which does not match its definition of type array.`
+        );
+      }
+
       if (items?.properties) {
         objectKey.forEach((item) => _validate(items.properties, item));
       } else {
-        if (!objectKey.every((item) => typeof item === items.type)) {
+        if (!objectKey?.every((item) => typeof item === items.type)) {
           throw new Error(`Key ${key} has a value which does not match its definition of type ${items.type}[].`);
         }
       }
@@ -181,9 +204,8 @@ function _validate(schema, object) {
   }
 }
 
-function picosv(inputSchema) {
-  // const schema = _parse(inputSchema);
-  const schema = inputSchema;
+function picosv(inputSchema: SchemaType) {
+  const schema = _parse(inputSchema);
   function validate(object) {
     return _validate(schema, object);
   }
