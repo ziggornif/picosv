@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const ALLOWED_TYPES = ['string', 'number', 'bigint', 'boolean', 'object'];
 
 type EntityType = StringType | NumberType | BigintType | BooleanType;

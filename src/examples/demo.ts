@@ -44,7 +44,7 @@ const a: MyType = {
   },
   data: {
     bar: 12,
-    foo: '',
+    foo: 'test',
     infinite: {
       infinity: 2122,
     },

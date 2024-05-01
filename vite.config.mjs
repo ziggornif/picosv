@@ -31,7 +31,7 @@ export default defineConfig({
     outputFile: './coverage/junit.xml',
     coverage: {
       include: ['src/**/*.{js,ts}'],
-      exclude: ['**/**.spec.{js,ts}', 'src/examples/'],
+      exclude: ['**/**.spec.{js,ts}', 'src/examples/', 'src/benchmark'],
       reportsDirectory: 'coverage',
       reporter: ['lcov', 'text', 'cobertura'],
     },
