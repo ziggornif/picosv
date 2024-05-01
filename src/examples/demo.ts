@@ -4,28 +4,32 @@ import { array, boolean, number, object, optional, picosv, string } from '..';
 const schema = {
   event: string(),
   count: number(),
-  active: optional(boolean()),
-  unknown: optional(object()),
+  active: boolean(),
+  unknown: object(),
   data: object({
     foo: string(),
-    bar: optional(number()),
+    bar: number(),
     infinite: object({
       infinity: number(),
     }),
   }),
-  arr: array(string()),
-  events: optional(
-    array(
-      object({
-        type: string(),
-        content: object({
-          description: string(),
-          author: string(),
-          valid: optional(boolean()),
-        }),
-      })
-    )
+  arr: array(array(string())),
+  other: array(object()),
+  events: array(
+    object({
+      type: string(),
+      content: object({
+        description: string(),
+        author: string(),
+        valid: boolean(),
+      }),
+    })
   ),
+  op: optional(string()),
+  opBis: object({
+    something: boolean(),
+    oth: optional(object()),
+  }),
 } as const satisfies SchemaType;
 type MyType = FromSchema<typeof schema>;
 
@@ -39,19 +43,27 @@ const a: MyType = {
     foo: 'bar',
   },
   data: {
-    bar: 55,
-    foo: 'test',
+    bar: 12,
+    foo: '',
     infinite: {
-      infinity: 55,
+      infinity: 2122,
     },
   },
-  arr: ['foo', 'bar'],
+  arr: [['foo', 'bar']],
+  other: [{ lol: '' }],
   events: [
     {
       type: 'foo',
-      content: 'qwe',
+      content: {
+        author: '',
+        valid: false,
+        description: 'de',
+      },
     },
   ],
+  opBis: {
+    something: true,
+  },
 };
 
 const validation = picoSchema.validate(a);

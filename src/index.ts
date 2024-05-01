@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 const ALLOWED_TYPES = ['string', 'number', 'bigint', 'boolean', 'object'];
 
-type EntityType = StringType | NumberType | BigintType | BooleanType | GenericObjectType;
+type EntityType = StringType | NumberType | BigintType | BooleanType;
 
 type StringType = {
   type: 'string';
@@ -18,40 +19,36 @@ type BooleanType = {
   type: 'boolean';
 };
 
+type ObjectType<T = SchemaType> = {
+  type: 'object';
+  properties: T;
+};
+
 type GenericObjectType = {
   type: 'object';
 };
 
-type ObjectType = {
-  type: 'object';
-  properties: SchemaType;
-};
+type SchemaItemType = EntityType | ObjectType | ArrayType<any> | GenericObjectType;
 
-type LiteralArrayType = {
+type ArrayType<T extends SchemaItemType> = {
   type: 'array';
-  items: EntityType;
+  items: T;
 };
 
-type ObjectArrayType = {
+type LiteralArrayType<T = EntityType> = {
   type: 'array';
-  items: ObjectType;
+  items: T;
 };
 
-type GenericObjectArrayType = {
+type ObjectArrayType<T = ObjectType> = {
   type: 'array';
-  items: GenericObjectType;
+  items: T;
 };
 
-type Optional<T> = T & { optional: boolean };
+type Optional<T = SchemaItemType> = T & { optional: boolean };
 
 export type SchemaType = {
-  [key: string]:
-    | EntityType
-    | ObjectType
-    | GenericObjectType
-    | LiteralArrayType
-    | ObjectArrayType
-    | GenericObjectArrayType;
+  [key: string]: SchemaItemType | Optional<SchemaItemType>;
 };
 
 interface Mapping {
@@ -59,21 +56,32 @@ interface Mapping {
   string: string;
   bigint: bigint;
   boolean: boolean;
-  object: object;
 }
 
+type TypeFromObjectType<T extends ObjectType | GenericObjectType> = T extends ObjectType
+  ? FromSchema<T['properties']>
+  : object;
+
+type OptionalFields<T extends SchemaType> = {
+  [K in keyof T]: T[K] extends Optional<SchemaItemType> ? K : never;
+}[keyof T];
+
+type RequiredFields<T extends SchemaType> = {
+  [K in keyof T]: T[K] extends Optional<SchemaItemType> ? never : K;
+}[keyof T];
+
+type FromSchemaItem<T extends SchemaItemType> = T extends EntityType
+  ? Mapping[T['type']]
+  : T extends ObjectType | GenericObjectType
+    ? TypeFromObjectType<T>
+    : T extends ArrayType<any>
+      ? FromSchemaItem<T['items']>[]
+      : never;
+
 export type FromSchema<T extends SchemaType> = {
-  [K in keyof T]: T[K] extends EntityType
-    ? Mapping[T[K]['type']]
-    : // : T[K] extends GenericObjectType
-      // ? Mapping[T[K]['type']]
-      T[K] extends ObjectType
-      ? FromSchema<T[K]['properties']>
-      : T[K] extends LiteralArrayType | GenericObjectArrayType
-        ? Mapping[T[K]['items']['type']][]
-        : T[K] extends ObjectArrayType
-          ? FromSchema<T[K]['items']['properties']>[]
-          : never;
+  [K in keyof T as Exclude<K, OptionalFields<T>>]: FromSchemaItem<T[K]>;
+} & {
+  [K in keyof T as Exclude<K, RequiredFields<T>>]+?: FromSchemaItem<T[K]>;
 };
 
 function string(): StringType {
@@ -100,14 +108,16 @@ function bigint(): BigintType {
   };
 }
 
-function object(properties?: SchemaType): GenericObjectType | ObjectType {
-  if (properties) return { type: 'object', properties } as ObjectType;
-  return { type: 'object' } as GenericObjectType;
+function object(): GenericObjectType;
+function object<T extends SchemaType>(properties: T): ObjectType<T>;
+function object<T extends SchemaType>(properties?: T) {
+  if (properties) {
+    return { type: 'object', properties };
+  }
+  return { type: 'object' };
 }
 
-function array(
-  type: EntityType | ObjectType | GenericObjectType
-): LiteralArrayType | ObjectArrayType | GenericObjectArrayType {
+function array<T extends SchemaItemType>(type: T): ArrayType<T> {
   if (!type) {
     throw new Error(`ArrayTypeError - array type must be defined.`);
   }
@@ -118,9 +128,7 @@ function array(
   };
 }
 
-function optional(
-  type: EntityType | ObjectType | GenericObjectType | LiteralArrayType | ObjectArrayType | GenericObjectArrayType
-): Optional<EntityType | ObjectType | GenericObjectType | LiteralArrayType | ObjectArrayType | GenericObjectArrayType> {
+function optional<T extends SchemaItemType>(type: T): Optional<T> {
   if (!type) {
     throw new Error(`OptionalTypeError - optional need a type.`);
   }
